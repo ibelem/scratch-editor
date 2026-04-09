@@ -1,0 +1,6 @@
+{
+  "installCommand": "cd $(git rev-parse --show-toplevel) && npm ci --ignore-scripts && npm install yauzl@3.3.0 --no-save --ignore-scripts && node packages/scratch-gui/scripts/prepare.mjs",
+  "buildCommand": "cd $(git rev-parse --show-toplevel) && npm run build:dev --workspace=packages/scratch-gui",
+  "outputDirectory": "packages/scratch-gui/build",
+  "framework": null
+}
