@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scratch 编程</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      background: #f0f4ff;
+      color: #1e1e2e;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #4c2ecc;
+      letter-spacing: .02em;
+    }
+    header p {
+      margin-top: 6px;
+      color: #666;
+      font-size: .9rem;
+    }
+
+    .groups {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .group {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(76,46,204,.08);
+      overflow: hidden;
+    }
+    .group-header {
+      background: linear-gradient(135deg, #4c2ecc 0%, #7b5ff5 100%);
+      color: #fff;
+      padding: 14px 20px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .group-header .badge {
+      background: rgba(255,255,255,.22);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: .8rem;
+      font-weight: 500;
+    }
+
+    .subgroup {
+      border-top: 1px solid #f0f0f8;
+    }
+    .subgroup-title {
+      padding: 10px 20px 6px;
+      font-size: .78rem;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .items {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      padding: 8px 16px 16px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: #f7f5ff;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      color: #2d1b8e;
+      font-size: .88rem;
+      font-weight: 500;
+      transition: background .15s, border-color .15s, transform .1s;
+      line-height: 1.3;
+      word-break: break-all;
+    }
+    .item:hover {
+      background: #ede8ff;
+      border-color: #7b5ff5;
+      transform: translateY(-1px);
+    }
+    .item:active {
+      transform: translateY(0);
+    }
+    .item .icon {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .65rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .icon-sb3  { background: #4c97ff; }
+    .icon-sb2  { background: #ff8c1a; }
+    .icon-sb   { background: #59c059; }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: .8rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🐱 Scratch 编程</h1>
+    <p>点击任意项目，直接在 Scratch 编辑器中打开运行</p>
+  </header>
+
+  <div class="groups" id="root"></div>
+
+  <footer>Scratch Editor · <a href="/" style="color:#7b5ff5;text-decoration:none">返回编辑器</a></footer>
+
+  <script>
+    // All Scratch project URLs (only .sb / .sb2 / .sb3 files)
+    const PROJECTS = [
+      // ── A 阶段 33 课 ─────────────────────────────────────────────────────────────
+      "https://belem.github.io/scratch/a33/01-海底世界.sb3",
+      "https://belem.github.io/scratch/a33/02-恐龙乐园.sb3",
+      "https://belem.github.io/scratch/a33/03-奔跑的哨子.sb3",
+      "https://belem.github.io/scratch/a33/04-排队的虫子.sb3",
+      "https://belem.github.io/scratch/a33/05-鲨鱼特效.sb3",
+      "https://belem.github.io/scratch/a33/06-山地足球.sb3",
+      "https://belem.github.io/scratch/a33/07-保卫小鸡.sb3",
+      "https://belem.github.io/scratch/a33/08-迷宫游戏.sb3",
+      "https://belem.github.io/scratch/a33/09-七彩钢琴.sb3",
+      "https://belem.github.io/scratch/a33/10-长江索道.sb3",
+      "https://belem.github.io/scratch/a33/11-打砖块.sb3",
+      "https://belem.github.io/scratch/a33/12-聪明的虫子.sb3",
+      "https://belem.github.io/scratch/a33/13-飞天小猫.sb3",
+      "https://belem.github.io/scratch/a33/14-魔术表演.sb3",
+      "https://belem.github.io/scratch/a33/15-神笔马良.sb3",
+      "https://belem.github.io/scratch/a33/16-听音识路.sb3",
+      "https://belem.github.io/scratch/a33/17-冒险之旅.sb3",
+      "https://belem.github.io/scratch/a33/18-豆豆哥吃害虫.sb3",
+      "https://belem.github.io/scratch/a33/19-小鸟与瓶子.sb3",
+      "https://belem.github.io/scratch/a33/20-happy new year.sb3",
+      "https://belem.github.io/scratch/a33/21-飞机大战.sb3",
+      "https://belem.github.io/scratch/a33/22-玩转金箍棒.sb3",
+      "https://belem.github.io/scratch/a33/23-青蛙过河记.sb3",
+      "https://belem.github.io/scratch/a33/24-打蝴蝶.sb3",
+      "https://belem.github.io/scratch/a33/25-千层板.sb3",
+      "https://belem.github.io/scratch/a33/26-炸渔船.sb3",
+      "https://belem.github.io/scratch/a33/27-跳动的音符.sb3",
+      "https://belem.github.io/scratch/a33/28-接鸡蛋.sb3",
+      "https://belem.github.io/scratch/a33/29-妙笔生花.sb3",
+      "https://belem.github.io/scratch/a33/30-星球陷阱.sb3",
+      "https://belem.github.io/scratch/a33/31-泡泡堂.sb3",
+      "https://belem.github.io/scratch/a33/32-元宵佳节.sb3",
+      "https://belem.github.io/scratch/a33/33-bonus-太空大战.sb3",
+
+      // ── B 阶段 31 课 ─────────────────────────────────────────────────────────────
+      "https://belem.github.io/scratch/b31/01-打蝙蝠.sb3",
+      "https://belem.github.io/scratch/b31/02-七巧板.sb3",
+      "https://belem.github.io/scratch/b31/03-趣味加减法.sb3",
+      "https://belem.github.io/scratch/b31/04-生肖占卜.sb3",
+      "https://belem.github.io/scratch/b31/05-数学豌豆射手.sb3",
+      "https://belem.github.io/scratch/b31/06-长方形面积.sb3",
+      "https://belem.github.io/scratch/b31/06-直角三角形面积.sb3",
+      "https://belem.github.io/scratch/b31/07-学习三角形的构成.sb3",
+      "https://belem.github.io/scratch/b31/08-打字游戏.sb3",
+      "https://belem.github.io/scratch/b31/09-猜数字.sb3",
+      "https://belem.github.io/scratch/b31/10-DIY电子时钟.sb3",
+      "https://belem.github.io/scratch/b31/11-快速心算挑战-.sb3",
+      "https://belem.github.io/scratch/b31/12-程序绘制长城.sb3",
+      "https://belem.github.io/scratch/b31/13-荒漠狂飙.sb3",
+      "https://belem.github.io/scratch/b31/14-多边形绘图.sb3",
+      "https://belem.github.io/scratch/b31/15-猜猜-哪头大象重.sb3",
+      "https://belem.github.io/scratch/b31/16-顺序查找法.sb3",
+      "https://belem.github.io/scratch/b31/17-追逐金币.sb3",
+      "https://belem.github.io/scratch/b31/18-石头剪刀布.sb3",
+      "https://belem.github.io/scratch/b31/19-猴子吃桃.sb3",
+      "https://belem.github.io/scratch/b31/19-李白喝酒.sb3",
+      "https://belem.github.io/scratch/b31/20相遇问题正式.sb3",
+      "https://belem.github.io/scratch/b31/21-鸡兔同笼.sb3",
+      "https://belem.github.io/scratch/b31/22-闯关跑酷.sb3",
+      "https://belem.github.io/scratch/b31/23-韩信点兵.sb3",
+      "https://belem.github.io/scratch/b31/24-炫酷画图.sb3",
+      "https://belem.github.io/scratch/b31/25-最强大脑之闪电记忆.sb3",
+      "https://belem.github.io/scratch/b31/26-利润问题.sb3",
+      "https://belem.github.io/scratch/b31/27-100内质数表.sb3",
+      "https://belem.github.io/scratch/b31/28-光影鼠.sb3",
+      "https://belem.github.io/scratch/b31/29-分配任务.sb3",
+      "https://belem.github.io/scratch/b31/29-最大公因数.sb3",
+      "https://belem.github.io/scratch/b31/30-百元买百鸡.sb3",
+      "https://belem.github.io/scratch/b31/31-一维世界.sb3",
+
+      // ── 《Scratch编程从入门到精通》 ─────────────────────────────────────
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第1章-编程起步/范例/数学编程：韩信点兵.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第1章-编程起步/范例/游戏编程：星际飞行.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第2章-变量和运算/练习/2.1 小猫的哲学思考.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第2章-变量和运算/练习/2.2 说出字母数.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第2章-变量和运算/练习/2.3 求两数之和.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第2章-变量和运算/练习/2.4 计算大桥长度.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第2章-变量和运算/练习/2.5 随机投点画圆.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第2章-变量和运算/练习/2.6 回文诗.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第2章-变量和运算/范例/2.1 小猫背唐诗.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第2章-变量和运算/范例/2.2 简单的人机对话.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第2章-变量和运算/范例/2.3 小猫变大变小.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第2章-变量和运算/范例/2.4 鸡兔同笼.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第2章-变量和运算/范例/2.5 小鱼逍遥游.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第2章-变量和运算/范例/2.6 成语接龙.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第3章-程序控制/练习/3.1 计算圆锥体积.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第3章-程序控制/练习/3.2 判断三角形构成.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第3章-程序控制/练习/3.3 肖像在哪里.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第3章-程序控制/范例/3.1 海伦公式.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第3章-程序控制/范例/3.1 求梯形面积.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第3章-程序控制/范例/3.2 判断奇偶数.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第3章-程序控制/范例/3.2 求一个数的绝对值.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第3章-程序控制/范例/3.3 冰雹猜想.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第3章-程序控制/范例/3.3 累加1到100.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第4章-列表/练习/4.1 评委打分.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第4章-列表/练习/4.2 约瑟夫环.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第4章-列表/范例/4.1 求平均气温.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第4章-列表/范例/4.2 银行叫号系统.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第5章-过程/练习/5.1 判断质数.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第5章-过程/练习/5.2 婓波那契数列.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第5章-过程/练习/5.3 数字黑洞1和4.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第5章-过程/范例/5.1 计算圆的面积.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第5章-过程/范例/5.2 递归计算阶乘.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第5章-过程/范例/5.2 辗转相除法.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第5章-过程/范例/5.3 卡普雷卡尔黑洞（数字黑洞6174）.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第7章-舞台/练习/7.3 电子相册.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第7章-舞台/范例/7.1 海底探险1-游戏场景.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第8章-角色外观和运动/练习/8.2 街舞表演.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第8章-角色外观和运动/练习/8.3 飞行猫.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第8章-角色外观和运动/练习/8.4 魔术师.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第8章-角色外观和运动/范例/8.1 海底探险2-创建角色.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第8章-角色外观和运动/范例/8.2 海底探险3-角色动画.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第8章-角色外观和运动/范例/8.3 海底探险4-角色运动.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第8章-角色外观和运动/范例/8.4 海底探险5-角色特效.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第9章-侦测/练习/9.1 Pico和小狗散步.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第9章-侦测/练习/9.2 巡线甲虫.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第9章-侦测/练习/9.3 反弹球.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第9章-侦测/练习/9.4 时钟.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第9章-侦测/练习/9.5 手势抓蝴蝶.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第9章-侦测/练习/9.6 吹生日蜡烛.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第9章-侦测/范例/9.1 海底探险6-距离侦测.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第9章-侦测/范例/9.2 海底探险7-碰撞侦测.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第9章-侦测/范例/9.3 海底探险8-扔炸弹.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第9章-侦测/范例/9.4 海底探险9-游戏倒计时.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第9章-侦测/范例/9.5 人体感应开灯.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第9章-侦测/范例/9.6 声控开灯.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第10章-绘图/练习/10.2 矩形颜色图谱.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第10章-绘图/练习/10.2 圆环形颜色图谱.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第10章-绘图/练习/10.3 彩色风车.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第10章-绘图/练习/10.3 旋转的彩色风车.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第10章-绘图/范例/10.1 海底探险10-绘制血条.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第10章-绘图/范例/10.2 彩虹画板.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第10章-绘图/范例/10.3 种蘑菇.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第11章-声音/练习/11.3 演奏《两只老虎》.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第11章-声音/练习/11.3 演奏《上学歌》.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第11章-声音/练习/11.3 演奏《小毛驴》.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第11章-声音/范例/11.1 海底探险11-游戏音效.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第11章-声音/范例/11.3 模拟乐器.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第12章-克隆/练习/12.1 飞扬的小鸟.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第12章-克隆/范例/12.1 海底探险12-克隆角色.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第13章-消息和事件/练习/13.4 小熊打车.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第13章-消息和事件/范例/13.1 海底探险13-消息机制.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第14章-英汉词典/范例/14.1 英汉词典-框架.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第14章-英汉词典/范例/14.2.1-冒泡排序.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第14章-英汉词典/范例/14.2.2-选择排序.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第14章-英汉词典/范例/14.2.3-插入排序.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第14章-英汉词典/范例/14.2.4-快速排序.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第14章-英汉词典/范例/14.2.5 英汉词典-排序.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第14章-英汉词典/范例/14.3.1-顺序查找.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第14章-英汉词典/范例/14.3.2-二分查找.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第14章-英汉词典/范例/14.3.3 英汉词典-查询.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第14章-英汉词典/范例/14.4 英汉词典-新词条.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第15章-企鹅走迷宫/范例/15.2 企鹅走迷宫-迷宫界面.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第15章-企鹅走迷宫/范例/15.2.3 企鹅走迷宫-加载迷宫地图.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第15章-企鹅走迷宫/范例/15.2.4 企鹅走迷宫-构建迷宫外形.sb2",
+      "https://belem.github.io/scratch/Scratch编程从入门到精通/第15章-企鹅走迷宫/范例/15.3.3 企鹅走迷宫-迷宫寻路.sb2",
+    ];
+
+    /** Derive display label from a full URL: take the filename, strip extension. */
+    function label(url) {
+      const filename = url.split('/').pop();
+      return filename.replace(/\.sb[23]?$/i, '');
+    }
+
+    /** Return the file extension in lower case: 'sb3', 'sb2', or 'sb'. */
+    function ext(url) {
+      const m = url.match(/\.(sb[23]?)$/i);
+      return m ? m[1].toLowerCase() : 'sb3';
+    }
+
+    /**
+     * Classify each URL into a top-level group key and an optional subgroup key.
+     * Returns { group, subgroup }.
+     */
+    function classify(url) {
+      const base = 'https://belem.github.io/scratch/';
+      const rel = url.slice(base.length);   // e.g. "a33/01-海底世界.sb3"
+      const parts = rel.split('/');
+
+      if (parts[0] === 'a33') return { group: 'a33', subgroup: null };
+      if (parts[0] === 'b31') return { group: 'b31', subgroup: null };
+      if (parts[0].startsWith('Scratch编程')) {
+        // parts[1] is e.g. "第10章-绘图"
+        const chap = parts[1] || '其它';
+        return { group: 'book', subgroup: chap };
+      }
+      return { group: 'other', subgroup: null };
+    }
+
+    // ── Build ordered data structure ─────────────────────────────────────────
+
+    const TOP_GROUPS = [
+      { key: 'book',  label: 'Scratch 编程从入门到精通', icon: '📖' },
+      { key: 'a33',   label: 'A 阶段 33 课', icon: '🎮' },
+      { key: 'b31',   label: 'B 阶段 31 课', icon: '🚀' },
+    ];
+
+    // Map: groupKey → Map<subgroupKey, url[]>
+    const data = {};
+    TOP_GROUPS.forEach(g => { data[g.key] = new Map(); });
+
+    PROJECTS.forEach(url => {
+      const { group, subgroup } = classify(url);
+      if (!data[group]) return;
+      const sg = subgroup || '__root__';
+      if (!data[group].has(sg)) data[group].set(sg, []);
+      data[group].get(sg).push(url);
+    });
+
+    // ── Render ───────────────────────────────────────────────────────────────
+
+    const root = document.getElementById('root');
+
+    TOP_GROUPS.forEach(({ key, label: groupLabel, icon }) => {
+      const map = data[key];
+      if (!map || map.size === 0) return;
+
+      const totalCount = [...map.values()].reduce((s, a) => s + a.length, 0);
+
+      const section = document.createElement('div');
+      section.className = 'group';
+
+      const hdr = document.createElement('div');
+      hdr.className = 'group-header';
+      hdr.innerHTML =
+        `${icon} ${groupLabel} <span class="badge">${totalCount} 个作品</span>`;
+      section.appendChild(hdr);
+
+      map.forEach((urls, sg) => {
+        const container = document.createElement('div');
+        container.className = 'subgroup';
+
+        if (sg !== '__root__') {
+          const title = document.createElement('div');
+          title.className = 'subgroup-title';
+          // "第10章-绘图" → "第10章 绘图"
+          title.textContent = sg.replace(/-/g, ' ');
+          container.appendChild(title);
+        }
+
+        const grid = document.createElement('div');
+        grid.className = 'items';
+
+        urls.forEach(url => {
+          const e = ext(url);
+          const a = document.createElement('a');
+          a.className = 'item';
+          a.href = '/?url=' + encodeURIComponent(url);
+          // Open in same tab so the browser back button brings them here
+          a.innerHTML =
+            `<span class="icon icon-${e}">${e.toUpperCase()}</span>${label(url)}`;
+          grid.appendChild(a);
+        });
+
+        container.appendChild(grid);
+        section.appendChild(container);
+      });
+
+      root.appendChild(section);
+    });
+  </script>
+</body>
+</html>
