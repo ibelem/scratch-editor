@@ -1,0 +1,36 @@
+name: "Fork: Cancel Unnecessary Workflows"
+
+# Automatically cancel workflows that are not needed on this fork.
+# This is a fork-only file; it does not exist upstream and will not
+# cause rebase conflicts during sync-upstream runs.
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+      - Publish
+      - "Deploy Playground Preview"
+      - "Signature Assistant"
+      - "Update i18n"
+      - "GitHub Pages Cleanup"
+      - "Lint Commit Messages"
+      - "GitHub Actions Debug Info"
+    types: [requested]
+
+permissions:
+  actions: write
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const runId = context.payload.workflow_run.id;
+            console.log(`Cancelling workflow run ${runId} (${context.payload.workflow_run.name})`);
+            await github.rest.actions.cancelWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId
+            });

@@ -128,11 +128,9 @@ const SBFileUploaderHOC = function (WrappedComponent) {
                 // begin to read data from the file. When finished,
                 // cues step 6 using the reader's onload callback
                 this.fileReader.readAsArrayBuffer(this.fileToUpload);
-            } else {
-                this.props.cancelFileUpload(this.props.loadingState);
-                // skip ahead to step 7
-                this.removeFileObjects();
             }
+            // If no file is staged, another HOC (e.g. UrlProjectLoaderHOC) has
+            // requested this loading state and will handle it; do nothing here.
         }
         // step 6: attached as a handler on our FileReader object; called when
         // file upload raw data is available in the reader
@@ -148,6 +146,17 @@ const SBFileUploaderHOC = function (WrappedComponent) {
                             this.props.onSetProjectTitle(uploadedProjectTitle);
                         }
                         loadingSuccess = true;
+                        // If the page was opened with ?url=…, clear that parameter now
+                        // that the user has replaced it with a locally uploaded file.
+                        const params = new URLSearchParams(window.location.search);
+                        if (params.has('url')) {
+                            params.delete('url');
+                            const newSearch = params.toString() ? `?${params.toString()}` : '';
+                            history.replaceState(
+                                null, '',
+                                window.location.pathname + newSearch + window.location.hash
+                            );
+                        }
                     })
                     .catch(error => {
                         log.warn(error);

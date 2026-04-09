@@ -209,6 +209,11 @@ const buildConfig = baseConfig.clone()
                 to: 'static'
             },
             {
+                // Also serve list.html at the build root so Vercel can resolve /list
+                from: 'static/list.html',
+                to: 'list.html'
+            },
+            {
                 from: 'extensions/**',
                 to: 'static',
                 context: 'src/examples'
